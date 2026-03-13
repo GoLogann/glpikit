@@ -150,8 +150,8 @@ glpikit documents-download 55 --to ./downloads/manual.pdf
 ### Unit tests
 
 ```bash
-ruff check .
-pytest -q
+python -m ruff check .
+python -m pytest -q
 ```
 
 ### Integration tests (GLPI real)
@@ -163,10 +163,12 @@ Variaveis esperadas:
 - `GLPI_INTEGRATION_APP_TOKEN`
 - opcional v2: `GLPI_INTEGRATION_CLIENT_ID`, `GLPI_INTEGRATION_CLIENT_SECRET`, `GLPI_INTEGRATION_USERNAME`, `GLPI_INTEGRATION_PASSWORD`
 
+Observacao: `GLPI_INTEGRATION_BASE_URL` deve ser a URL base da instancia, sem `/apirest.php`.
+
 Execucao:
 
 ```bash
-pytest -q tests/integration
+python -m pytest -q tests/integration
 ```
 
 Helper de matriz Docker:
