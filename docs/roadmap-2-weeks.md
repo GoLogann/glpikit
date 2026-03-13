@@ -1,8 +1,8 @@
-# Roadmap 2 semanas (MVP3.1 -> MVP3.3)
+# Roadmap 2 semanas (status atualizado em 13/03/2026)
 
-Periodo sugerido: 16 a 27 de marco de 2026.
+Este documento consolida o plano de duas semanas com status real de execucao.
 
-## Objetivo
+## Objetivo original
 
 Fechar robustez de producao para GLPI com foco em:
 
@@ -11,128 +11,117 @@ Fechar robustez de producao para GLPI com foco em:
 - compatibilidade plugin-aware
 - operacao segura e observavel
 
-## Sprint breakdown
+## Status por frente
 
-### Semana 1 (16-20/03/2026): base tecnica e cobertura v2
+### 1) Cobertura v2 orientada a OpenAPI
 
-#### PR 1 - OpenAPI coverage v2 (MVP3.1)
+Status: **concluido (MVP3.1)**
 
-Escopo:
-
-- fortalecer `v2.call(operation_id, ...)` para todos verbos e parametros
-- mapear path/query/body com validacao minima
-- adicionar utilitario para listar operacoes faltantes por `operationId`
-- criar smoke tests para chamadas de operacao com spec mock
+- `v2.call(operation_id, ...)` com mapeamento de path/query/header/cookie/body
+- coercao de tipos baseada em schema OpenAPI
+- parsing tipado de resposta com `v2.call_typed(...)`
+- `v2.generated.<operationId>(...)` e `v2.adapter("Itemtype")` (best-effort)
+- modelos de request/response gerados em runtime por operacao
 
 Arquivos principais:
 
 - `src/glpikit/v2/resources.py`
 - `src/glpikit/v2/openapi.py`
-- `tests/test_v2_openapi_operations.py` (novo)
+- `src/glpikit/v2/typed.py`
+- `src/glpikit/v2/generated/runtime.py`
 
-Criterio de aceite:
+Testes relacionados:
 
-- `v2.operations()` lista operacoes reais da spec
-- `v2.call(...)` executa GET/POST/PUT/PATCH/DELETE com parametros corretos
-- cobertura de testes para fluxo de erro e sucesso
+- `tests/test_v2_contract.py`
+- `tests/test_v2_generated_and_adapters.py`
+- `tests/test_policy_oauth_and_v2_typed.py`
 
-#### PR 2 - Search metadata cache + bulk ergonomics (MVP3.1)
+### 2) Search metadata cache + bulk ergonomics
 
-Escopo:
+Status: **concluido (MVP3.1)**
 
 - cache TTL para `list_search_options`
-- API de busca com resolucao de campo por nome/uid
-- utilitarios de lote: chunk processing e resumo de resultados
+- resolucao de campos por nome/uid na DSL de busca
+- iteradores (`iter_all`, `iter_search`, `aiter_search`)
+- bulk operations com chunking, retry parcial e relatorio consolidado
 
 Arquivos principais:
 
-- `src/glpikit/resources/search.py`
 - `src/glpikit/resources/items.py`
-- `src/glpikit/utils/` (cache e bulk helpers)
-- `tests/test_search_cache.py` (novo)
+- `src/glpikit/resources/search.py`
+- `src/glpikit/utils/cache.py`
+- `src/glpikit/utils/bulk.py`
 
-Criterio de aceite:
+Testes relacionados:
 
-- repeticao de chamadas de search options reduz requests redundantes
-- campos podem ser passados por nome amigavel quando metadata estiver no cache
-- resultados de lote retornam resumo consistente de sucesso/falha
+- `tests/test_items_advanced.py`
+- `tests/test_async_client.py`
 
-### Semana 2 (23-27/03/2026): producao, compatibilidade e release prep
+### 3) Integracao com GLPI real e CI
 
-#### PR 3 - Integration tests com GLPI em Docker (MVP3.2)
+Status: **parcial (MVP3.2)**
 
-Escopo:
+Ja entregue:
 
-- stack Docker para GLPI + DB em ambiente de teste
-- testes de integracao para auth v1, auth v2, tickets, search, documents
-- profile de CI para rodar suite de integracao opcionalmente
+- scaffold Docker (`docker/compose.glpi.yml`)
+- testes de integracao smoke (`tests/integration/test_live_glpi.py`)
+- workflow CI com job de integracao opcional (`.github/workflows/ci.yml`)
+- helper de matriz (`scripts/run_integration_matrix.sh`)
 
-Arquivos principais:
+Pendente para fechar 100%:
 
-- `docker/` (novo)
-- `tests/integration/` (novo)
-- `.github/workflows/ci.yml` ou equivalente (novo/ajuste)
+- matriz forte por versao GLPI/plugin com seed de dados
+- cenarios de escrita end-to-end automatizados de forma deterministica
+- isolamento de fixtures por entidade/perfil para evitar efeitos colaterais
 
-Criterio de aceite:
+### 4) Plugin-aware capabilities + safety
 
-- suite de integracao sobe ambiente do zero
-- casos criticos passam em GLPI real
-- fluxo local documentado em README/docs
+Status: **concluido (MVP3.2)**
 
-#### PR 4 - Plugin-aware capabilities e safety policies (MVP3.2)
-
-Escopo:
-
-- capabilities com descoberta real de recursos disponiveis
-- melhoria de `supports_itemtype` com fallback inteligente
-- policies de seguranca para operacoes destrutivas (`dry_run`, confirmacao)
+- `capabilities()` com descoberta de plugins e itemtypes conhecidos
+- `supports_graphql()`, `supports_v2()`, `supports_itemtype(...)`
+- policy engine para operacoes destrutivas (`dry_run`, confirmacao)
+- fallback automatico de auth/mode em `mode="auto"` (v1 <-> v2)
 
 Arquivos principais:
 
 - `src/glpikit/client.py`
 - `src/glpikit/async_client.py`
 - `src/glpikit/utils/capability.py`
-- `src/glpikit/ai/safe.py`
-- `tests/test_capabilities_plugins.py` (novo)
+- `src/glpikit/ai/policy.py`
 
-Criterio de aceite:
+Testes relacionados:
 
-- `capabilities()` reflete a instancia real do GLPI
-- plugin itemtype tem comportamento previsivel
-- operacoes destrutivas podem ser bloqueadas por policy
+- `tests/test_sync_client.py`
+- `tests/test_async_client.py`
+- `tests/test_mvp_completion.py`
+- `tests/test_policy_oauth_and_v2_typed.py`
 
-#### PR 5 - Observabilidade + release readiness (MVP3.3)
+### 5) Observabilidade + release readiness
 
-Escopo:
+Status: **quase concluido (MVP3.3)**
 
-- logging estruturado padrao de SDK
-- OpenTelemetry hooks opcionais
-- documentacao final de uso (sync/async, auth, plugin, troubleshooting)
-- checklist de release (semver, changelog, empacotamento)
+Ja entregue:
 
-Arquivos principais:
+- hooks estruturados de observabilidade
+- correlation id + redaction de headers sensiveis
+- coletor de metricas por status/metodo/endpoint + latencia
+- hooks opcionais para OpenTelemetry
+- documentacao de uso atualizada
 
-- `src/glpikit/transport/hooks.py`
-- `docs/*.md`
-- `CHANGELOG.md`
-- `pyproject.toml`
+Pendente para fechar 100%:
 
-Criterio de aceite:
+- publicacao oficial no PyPI
+- checklist final de release (tag semver, notas finais, automacao de publish)
 
-- tracing pode ser habilitado sem quebrar API publica
-- docs cobrem quickstart + troubleshooting + operacao avancada
-- pacote pronto para tag/release
+## Backlog imediato (restante para 100%)
 
-## Backlog imediato (pos 2 semanas)
-
-- OAuth2 authorization code + PKCE helper
-- CLI oficial (`glpikit ...`)
-- adaptadores nativos para LangChain/LangGraph/MCP
-- contract tests contra multiplas versoes de GLPI
+1. Integracao real forte em matriz GLPI/plugin com seed de dados e escrita automatizada.
+2. Pipeline de release/publicacao (PyPI) totalmente operacional.
 
 ## Definicao de pronto (global)
 
-- `ruff` e `pytest` verdes
+- `python -m ruff check .` e `python -m pytest -q` verdes
 - exemplos de docs executam sem ajuste manual
 - mudancas de API publica com notas de migracao
-- PRs pequenos e revisaveis (evitar mega-PR)
+- testes de integracao reais reproduziveis em ambiente limpo
