@@ -141,3 +141,34 @@ async def test_async_iter_search_and_cache() -> None:
     assert rows[0]["id"] == 7
 
     await glpi.close()
+
+
+def test_search_result_metadata_single_item_lists_are_coerced() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/apirest.php/initSession":
+            return httpx.Response(200, json={"session_token": "sess"})
+        if request.url.path == "/apirest.php/search/Ticket":
+            return httpx.Response(
+                200,
+                json={
+                    "totalcount": [1],
+                    "count": [1],
+                    "sort": [1],
+                    "order": ["ASC"],
+                    "data": [{"id": 1}],
+                },
+            )
+        return httpx.Response(404, json={"message": "not found"})
+
+    glpi = GLPI(
+        base_url="https://glpi.local",
+        mode="v1",
+        auth={"user_token": "u"},
+        transport=_sync_transport(handler),
+    )
+
+    result = glpi.items.search("Ticket")
+    assert result.totalcount == 1
+    assert result.count == 1
+    assert result.sort == 1
+    assert result.order == "ASC"
