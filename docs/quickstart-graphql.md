@@ -1,5 +1,7 @@
 # Quickstart GraphQL
 
+> Nota: use `base_url` da instancia sem `/apirest.php` (exemplo: `https://glpi.example.com`).
+
 ```python
 from glpikit import GLPI
 
