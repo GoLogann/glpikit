@@ -12,6 +12,7 @@ Projeto em construção com base pronta para os 3 MVPs:
 - recursos de domínio (entities, profiles, groups, computers, software etc.)
 - GraphQL read-only com introspecao e builder
 - `v2.call(operation_id, ...)` orientado a OpenAPI
+- `v2.generated.<operationId>(...)` e `v2.adapter("Itemtype")` (best-effort)
 - erros tipados
 - ferramentas AI (`create/get/update/search ticket`, `add_followup`, `search_user`, `get_entity`)
 - hooks de observabilidade (correlation id + sanitizacao de headers)
