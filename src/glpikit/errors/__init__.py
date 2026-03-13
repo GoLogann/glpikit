@@ -1,0 +1,33 @@
+from .base import (
+    AuthenticationError,
+    ConflictError,
+    GLPIError,
+    NotFoundError,
+    OAuthError,
+    PermissionDeniedError,
+    PolicyViolationError,
+    RateLimitError,
+    SerializationError,
+    ServerError,
+    SessionExpiredError,
+    TransportError,
+    UnsupportedFeatureError,
+    ValidationError,
+)
+
+__all__ = [
+    "GLPIError",
+    "AuthenticationError",
+    "SessionExpiredError",
+    "OAuthError",
+    "PolicyViolationError",
+    "PermissionDeniedError",
+    "NotFoundError",
+    "ValidationError",
+    "ConflictError",
+    "RateLimitError",
+    "ServerError",
+    "TransportError",
+    "SerializationError",
+    "UnsupportedFeatureError",
+]
