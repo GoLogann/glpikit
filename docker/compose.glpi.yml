@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: glpi
+      MYSQL_USER: glpi
+      MYSQL_PASSWORD: glpi
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  glpi:
+    image: ${GLPI_IMAGE:-ghcr.io/glpi-project/glpi:10.0.16}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TIMEZONE: UTC
+    ports:
+      - "8080:80"
