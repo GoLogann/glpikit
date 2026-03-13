@@ -19,3 +19,9 @@ python -m pytest -q tests/integration
 ```
 
 Os testes fazem smoke de leitura para validar conectividade e capacidades.
+
+Cobertura atual de smoke:
+
+- capacidades + busca basica (v1/v2)
+- `listSearchOptions` e iteracao de busca (v1, quando token v1 existe)
+- discovery OpenAPI e lista de operacoes (v2, quando credenciais OAuth2 existem)

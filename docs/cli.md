@@ -15,6 +15,13 @@ glpikit capabilities
 glpikit tickets-get 123
 glpikit search Ticket "email" --limit 5
 glpikit v2-call getTicket --param id=123
+glpikit v2-call updateTicket --param id=123 --param active=true --json '{"name":"novo"}'
+glpikit v2-operations --refresh
 glpikit documents-upload ./manual.pdf --name "Manual"
 glpikit documents-download 55 --to ./downloads/manual.pdf
 ```
+
+## Observacoes
+
+- `--param` faz coercao automatica de tipos simples (`int`, `float`, `bool`, `null`) e JSON (`{}` / `[]`).
+- parametros repetidos viram lista automaticamente.
